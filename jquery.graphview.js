@@ -15,6 +15,9 @@
 
 // TODO: when viewing one bubble type, add an option to add a search term that is the OR set of the currently displayed bubbles of that type
 
+// TODO: fix so that when switching between list and force the query should be redone instead of a rebuild, but also if there is a slider
+// set it should still work. at the moment without the data from the full list query the slider init fails
+
 // TODO: make a particular selection of facet values the search terms of a search on a different facet
 // for example given a list if citation IDs, make a term query for identifier IDs that are the same values
 
@@ -27,53 +30,49 @@
 
         // specify the defaults
         var defaults = {
-            "source": 'http://localhost:9200/test/record/_search',
+            /*"source": 'http://localhost:5005/everything',
+            "graphable": {
+                //"ignore":[], 
+                //"only":[], 
+                //"promote":{'record':['keywords','tags']}, 
+                //"links":{'wikipedia':['topic'],'reference':['_parents'],'record':['children']},
+                "ignoreisolated":false,
+                "dropfacets":true,
+                "drophits":true
+            },*/
+            //"source": 'http://localhost:9200/test/record/_search',
+            "source": 'http://129.67.24.26:9200/test/record/_search',
+            "graphable": false,
             "datatype": "JSONP",
             "searchbox_suggestions": [
                 {"field":"journal.name.exact","display":"journals"},
                 {"field":"author.name.exact","display":"authors"},
-                {"field":"title.exact","display":"titles"}
+                {"field":"title.exact","display":"titles"},
+                {"field":"keyword.exact","display":"keywords"}
             ],
             "suggestions_size": 100,
             "paging":{
                 "from":0,
-                "size":10
+                "size":100
             },
             "optionsbox_width": "300px",
             "list_overflow_control": true,
             "showlabels": false,
             "slide_on": "date",
-            "displaytype": "list",
+            "displaytype": "force",
+            "nodesize": 100,
             "nodetypes": [
-                {'field':'author.name.exact','display':'author names'},
-                {'field':'journal.name.exact','display':'journal names'},
-                {'field':'year.exact','display':'years'},
-                {'field':'date','display':'dates'},
+                {'field':'author.name.exact','display':'authors'},
+                {'field':'journal.name.exact','display':'journals'},
                 {'field':'citation.identifier.id.exact','display':'citations'}
+                //{'field':'keywords.exact','display':'keywords'},
+                //{'field':'tags.exact','display':'tags'}
             ]
 
         };
 
         $.fn.graphview.options = $.extend(defaults, options);
         var options = $.fn.graphview.options;
-
-
-        // ===============================================
-        // useful things snaffled from elsewhere
-        // ===============================================
-
-        // this one is copied from select2
-        function debounce(quietMillis, fn, ctx) {
-            ctx = ctx || undefined;
-            var timeout;
-            return function () {
-                var args = arguments;
-                window.clearTimeout(timeout);
-                timeout = window.setTimeout(function() {
-                    fn.apply(ctx, args);
-                }, quietMillis);
-            };
-        }
 
 
         // ===============================================
@@ -107,7 +106,6 @@
                 table += '</td></tr>';
             };
             table += '</table>';
-            // TODO: restrict table height if in a confined space, and set to overflow scroll. otherwise fills page
             $('.graphview_panel', obj).css({"width":(obj.width() - 30),"height":obj.height()});
             options.list_overflow_control ? $('.graphview_panel', obj).css({"width":obj.width(),"overflow":"auto"}) : false;
             $('.graphview_panel', obj).append(table);
@@ -115,8 +113,9 @@
         };
 
 
+
         // ===============================================
-        // bubble graph functions
+        // force graph functions
         // ===============================================
 
         var fill = function(pkg) {
@@ -131,38 +130,6 @@
         var fill = d3.scale.category20c();
         var fill = d3.scale.category10();
 
-        var bubble = function(data) {
-            var w = obj.width();
-            var h = obj.height();
-            var r = w;
-            w > h && h != 0 ? r = h : "";
-            var format = d3.format(",d");
-
-            var bubble = d3.layout.pack()
-                .sort(null)
-                .size([r, r]);
-            var vis = d3.select(".graphview_panel").append("svg:svg") // TODO: how to restrict this to the first panel object
-                .attr("width", r)
-                .attr("height", r)
-                .attr("class", "bubble")
-            var node = vis.selectAll("g.node")
-                .data(bubble(data)
-                .filter(function(d) { return !d.nodes }))
-                .enter().append("svg:g")
-                .attr("class", "node")
-                .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-            node.append("svg:circle")
-                .attr("r", 0)
-                .attr("fill", function(d) { return fill(d.data.group); })
-                .attr("stroke-width", 2)
-                .attr("stroke", function(d) { d3.rgb(fill(d.data.group)).darker()})
-                .transition().duration(1000).attr("r", function(d) { return d.r; })
-            node.on('click',function(d) {
-                showtitle(d)
-            })
-
-        };
-
         var showtitle = function(data) {
             var info = '<div class="well" style="margin-right:-10px;"><p>';
             info += '<a class="label graphview_newsearch" style="margin-right:3px;" data-facet="' + data.facet;
@@ -172,7 +139,7 @@
             info += '" data-value="' + data.className;
             info += '" alt="include in search terms" title="include in search terms" href="#">+ search</a> ';
             info += data.className;
-            data.value ? info += ' (' + data.value + ')' : false;
+            data.value && data.value > 1 ? info += ' (' + data.value + ')' : false;
             info += '</p></div>';
             $('.graphview_visinfo', obj).html("");
             $('.graphview_visinfo', obj).append(info);
@@ -180,10 +147,6 @@
         };
 
 
-
-        // ===============================================
-        // force graph functions
-        // ===============================================
         var force = function(json) {
             var w = obj.width();
             var h = obj.height();
@@ -202,7 +165,6 @@
                 .attr('fill', 'white');
 
             function redraw() {
-              console.log("here", d3.event.translate, d3.event.scale);
               vis.attr("transform",
                   "translate(" + d3.event.translate + ")"
                   + " scale(" + d3.event.scale + ")");
@@ -322,7 +284,7 @@
             } else {
                 var add = val;
             }
-            // TODO: add  to the search terms box
+            // TODO: add  to the search terms box - or make this the search term, depending on search button pressed
             $(this).parent().parent().remove();
             query();
         };
@@ -351,6 +313,16 @@
             };
         };
 
+        // set whether or not to ignore isolated when graphing backend is available
+        var isolated = function() {
+            if ( options.graphable.ignoreisolated ) {
+                options.graphable.ignoreisolated = false;
+            } else {
+                options.graphable.ignoreisolated = true;
+            };
+            query();
+        };
+
         // set the displaytype
         var displaytype = function(event) {
             event ? event.preventDefault() : false;
@@ -364,7 +336,7 @@
                 $(this).attr('data-value','list');
             }
             $('.graphview_visopts').toggle()
-            build();
+            query();
         };
 
 
@@ -426,17 +398,18 @@
             $('.graphview_facetinfo', obj).html("");
             $('.graphview_visinfo', obj).html("");
             $('.graphview_resultcount', obj).html(options.data.hits.total);
-            options.data.hits.total < options.paging.size ? $('.graphview_howmany').val(options.data.hits.total) : false;
+            //options.data.hits.total < options.paging.size ? $('.graphview_howmany').val(options.data.hits.total) : false;
             // TODO: enable / disable the result set prev / next buttons depending on result size
 
             if ( options.displaytype == 'list' ) {
                 $('.dateslider').remove();
                 tabular(options.data);
+            } else if ( options.graphable ) {
+                force({"nodes":options.data.nodes,"links":options.data.links});
+                options.slide_on ? slider(options.data) : false;
             } else { 
-
                 var links = [];
                 var sdata = [];
-                //if ( !$('#bubbletype', obj).val().length ) {
                 for ( var i in options.data.hits.hits ) {
                     var indata = options.data.hits.hits[i]._source;
                     var pn = indata.title;
@@ -455,7 +428,6 @@
                     }
                     sdata.push(arr);
                 };
-                //} else {
                 if ( $('.graphview_bubbletype:checked', obj).length ) {
                     for ( var i in options.data.facets ) {
                         if ( i != "slider" ) {
@@ -493,7 +465,6 @@
                                 }
                                 sdata.push(arr);
                                 
-                                // TODO: finish this to build the links list
                                 for ( var x = 0; x < options.data.hits.hits.length; x++ ) {
                                     var record = sdata[x].record;
                                     var route = i.replace('.exact','');
@@ -511,12 +482,7 @@
 
                 $('.graphview_facetsizer').unbind('change',query).bind('change',query);
 
-
-                if ( options.displaytype == 'force' ) {
-                    force({"nodes":sdata,"links":links});
-                } else if ( options.displaytype == 'bubble' ) {
-                    bubble({"nodes":sdata});
-                }
+                force({"nodes":sdata,"links":links});
 
                 options.slide_on ? slider(options.data) : false;
                 
@@ -571,7 +537,7 @@
             for ( var b in bubbletypes ) {
                 var bb = bubbletypes[b];
                 if ( bb.length != 0 ) {
-                    var size = options.paging.size;
+                    var size = options.nodesize;
                     if ( $('#' + bb.replace(/\./g,'_') + '_graphview_facetsize', obj).val() ) {
                         size = $('#' + bb.replace(/\./g,'_') + '_graphview_facetsize', obj).val();
                     };
@@ -594,6 +560,8 @@
                     }
                 };
             };
+            // add graphing parameters if the backend supports graphing
+            options.graphable && options.displaytype != "list" ? qry.graph = options.graphable : false;
             options.query = qry;
             return options.query;
         };
@@ -708,7 +676,11 @@
         tg += '<div class="graphview_resultopts" style="margin:2px 0 5px 2px;">';
         tg += ' <a class="label graphview_reset" title="click to reset all selections" href="#">clear</a>';
         tg += ' <a class="label graphview_learnmore" title="click to view search help information" href="#">help</a>';
-        tg += ' <a data-value="list" class="label label-info graphview_visualise" title="click to visualise the links between these results" href="#">visualise</a>';
+        tg += ' <a data-value="';
+        options.displaytype == "list" ? tg += "list" : tg += "force";
+        tg += '" class="label label-info graphview_visualise" title="click to list / visualise the links between these results" href="#">';
+        options.displaytype != "list" ? tg += "list" : tg += "visualise";
+        tg += '</a>';
         tg += ' <a class="label graphview_prev" title="click to view previous results" href="#">prev</a> \
             <input class="graphview_howmany" type="text" value="';
         tg += options.paging.size;
@@ -720,9 +692,16 @@
         tg += '</div>';
 
         tg += '<div class="graphview_visopts" style="margin-top:5px;display:none;">';
-        tg += ' <div class="label label-info" style="display:inline;margin-right:2px;">';
-        options.showlabels ? tg += "hide labels" : tg += 'show labels';
-        tg += '<input type="checkbox" class="graphview_labelling" /></div>';      
+        tg += ' <div class="label label-info" style="display:inline;margin-right:2px;">show labels';
+        tg += '<input type="checkbox" class="graphview_labelling" ';
+        options.showlabels ? tg += "checked " : false;
+        tg += '/></div>';
+        if ( options.graphable ) {
+            tg += ' <div class="label label-info" style="display:inline;margin-right:2px;">ignore isolated';
+            tg += '<input type="checkbox" class="graphview_isolated" ';
+            options.graphable.ignoreisolated ? tg += "checked " : false;
+            tg +='/></div>'; 
+        }
         for ( var item in options.nodetypes ) {
             var node = options.nodetypes[item];
             tg += '<div class="label" style="display:inline;margin-right:2px;">' + node.display + '<input type="checkbox" class="graphview_bubbletype" data-value="' + node.field + '" /></div>';
@@ -742,9 +721,10 @@
 
         var setsearchfield = function(event) {
             event ? event.preventDefault() : false;
-            $('.graphview_searchfield').css({'color':'blue','text-decoration':'none'});
+            $('.graphview_searchfield', obj).css({'color':'blue','text-decoration':'none'});
             $(this).css({'color':'green','text-decoration':'underline'});
-            $('.graphview_searchfield_choice').val( $(this).attr('data-value') );
+            $('.graphview_searchfield_choice', obj).val( $(this).attr('data-value') );
+            // TODO: should make this focus on the main search box - .graphview_freetext but gets converted by select2
         };
 
         // ===============================================
@@ -754,8 +734,16 @@
 
             obj.append(tg);
             
+            var searchprompt = function() {
+                if ( options.searchbox_suggestions.length > 0 ) {
+                    return "search for any text, choose above to view suggestions, add a mixture of different sorts";
+                } else {
+                    return "search for any text";
+                }
+            }
+            
             $('.graphview_freetext', obj).select2({
-                "formatNoMatches": "",
+                "formatNoMatches": searchprompt,
                 "tags": function(q) {
                     var field = $('.graphview_searchfield_choice', obj).val();
                     var qry = {
@@ -862,9 +850,11 @@
             $('.graphview_bubbletype', obj).bind('change',query);
             $('.graphview_freetext', obj).bind('change',query);
             $('.graphview_howmany', obj).bind('change',query);
-            $('.graphview_labelling', obj).bind('click',labelling);
+            options.graphable ? $('.graphview_labelling', obj).bind('click',labelling) : false;
+            $('.graphview_isolated', obj).bind('click',isolated);
             $('.graphview_visualise', obj).bind('click',displaytype);
             $('.graphview_searchfield', obj).bind('click', setsearchfield);
+            options.displaytype != "list" ? $('.graphview_visopts').show() : false;
             
             query();
 

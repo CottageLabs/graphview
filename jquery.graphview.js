@@ -211,7 +211,7 @@
                 }
                 if ( d.className ) {
                     if ( isNaN(d.className) ) {
-                        l += d.className.substr(0,35);
+                        l += d.className;//.substr(0,35);
                         if ( d.className.length == 0 || d.className == "\n" ) {
                             l += 'NO SUITABLE VALUE';
                         }
@@ -425,10 +425,12 @@
                         "value": 0,
                         "facet": "none"
                     }
+                    arr.className == undefined ? arr.className = indata.projectComposition.project.title : false; // ADDED FOR GTR
                     sdata.push(arr);
                 };
                 if ( $('.graphview_bubbletype:checked', obj).length ) {
                     for ( var i in options.data.facets ) {
+                        //$('body').append(JSON.stringify(options.data.facets[i].terms));
                         if ( i != "slider" ) {
                             var facetblurb = '<p>Showing ';
                             if ( options.data.facets[i].other != 0 ) {
@@ -569,6 +571,8 @@
         };
         var query = function(event) {
             var qry = currentquery();
+            var currurl = '?source=' + JSON.stringify(qry)
+            window.history.pushState("","search",currurl);
             $.ajax({
                 type: "GET",
                 url: options.source + '?source=' + JSON.stringify(qry),

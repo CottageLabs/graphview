@@ -30,7 +30,7 @@
 
         // specify the defaults
         var defaults = {
-            /*"source": 'http://localhost:5005/everything',
+            "source": 'http://localhost:5005/everything',
             "graphable": {
                 //"ignore":[], 
                 //"only":[], 
@@ -38,11 +38,12 @@
                 //"links":{'wikipedia':['topic'],'reference':['_parents'],'record':['children']},
                 "ignoreisolated":false,
                 "dropfacets":true,
-                "drophits":true
-            },*/
+                "drophits":true,
+                "remote_source": "http://129.67.24.26:9200/test/record/_search"
+            },
             //"source": 'http://localhost:9200/test/record/_search',
-            "source": 'http://129.67.24.26:9200/test/record/_search',
-            "graphable": false,
+            //"source": 'http://129.67.24.26:9200/test/record/_search',
+            //"graphable": false,
             "datatype": "JSONP",
             "searchbox_suggestions": [
                 {"field":"journal.name.exact","display":"journals"},
@@ -58,7 +59,7 @@
             "optionsbox_width": "300px",
             "list_overflow_control": true,
             "showlabels": false,
-            "slide_on": "date",
+            "slide_on": "",//"date",
             "displaytype": "force",
             "nodesize": 100,
             "nodetypes": [
@@ -118,6 +119,7 @@
         // force graph functions
         // ===============================================
 
+        // a fill with colours similar to CL
         var fill = function(pkg) {
             var cols = ['#111','#333','#222','#444','#666','#888','#000','#bbb','#ddd','#c9d2d4','#ed1c24'];
             if ( isNaN(pkg) ) {
@@ -135,17 +137,14 @@
             info += '<a class="label graphview_newsearch" style="margin-right:3px;" data-facet="' + data.facet;
             info += '" data-value="' + data.className;
             info += '" alt="search only for this term" title="search only for this term" href="#">search</a> ';
-            info += '<a class="label graphview_newterm" style="margin-right:3px;" data-facet="' + data.facet;
-            info += '" data-value="' + data.className;
-            info += '" alt="include in search terms" title="include in search terms" href="#">+ search</a> ';
             info += data.className;
             data.value && data.value > 1 ? info += ' (' + data.value + ')' : false;
+            data.id.length != 1 || data.id.length == 1 && data.id[0] != data.className ? info += '<br>' + data.id : false;
             info += '</p></div>';
             $('.graphview_visinfo', obj).html("");
             $('.graphview_visinfo', obj).append(info);
             $('.graphview_newterm', obj).bind('click',newterm);
         };
-
 
         var force = function(json) {
             var w = obj.width();
@@ -561,7 +560,10 @@
                 };
             };
             // add graphing parameters if the backend supports graphing
-            options.graphable && options.displaytype != "list" ? qry.graph = options.graphable : false;
+            if ( options.graphable ) {
+                qry.graph = options.graphable;
+                options.displaytype == 'list' ? qry.graph.drophits = false : false;
+            }
             options.query = qry;
             return options.query;
         };
@@ -761,7 +763,10 @@
                             }
                         }
                     };
-                    
+                    if ( options.graphable ) {
+                        qry.graph = currentquery().graph;
+                        qry.graph.dropfacets = false;
+                    };
                     qry.facets.tags.facet_filter = {"query": currentquery().query };
                     if ( qry.facets.tags.facet_filter.query.bool.must[0].match_all !== undefined ) {
                         qry.facets.tags.facet_filter.query.bool.must = [];
@@ -806,7 +811,7 @@
                                             
                     //alert(JSON.stringify(qry,"","    "));
                     $.ajax({
-                        type: "GET",
+                        type: "POST",
                         url: options.source + '?source=' + JSON.stringify(qry),
                         contentType: "application/json; charset=utf-8",
                         dataType: options.datatype,

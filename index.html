@@ -30,54 +30,52 @@
     <script type="text/javascript" src="vendor/d3/d3.min.js"></script>
 
     <!-- get graphview and launch -->
-    <script type="text/javascript" src="jquery.graphview.js"></script>
-    <link rel="stylesheet" href="graphview.css">
+    <script type="text/javascript" src="jquery.graphview2.js"></script>
+    <!--<link rel="stylesheet" href="graphview.css"> there isnt any graphview css yet -->
     <script type="text/javascript">
     jQuery(document).ready(function($) {
         $('#graph').css({"height":$(window).height() - 5});
         $('#graph').graphview({
-            /*"source": 'http://test.cottagelabs.com:5010/graph',
-            "graphable": {
-                //"ignore":[], 
-                "only":["project"], 
-                //"promote":{'record':['keywords','tags']}, 
-                //"links":{'wikipedia':['topic'],'reference':['_parents'],'record':['children']},
-                "ignoreisolated":false,
-                "dropfacets":true,
-                "drophits":true
-            },*/
-            "source": 'http://test.cottagelabs.com:9200/gtr/project/_search',
-            "graphable": false,
-            "datatype": "JSONP",
-            "searchbox_suggestions": [
-                {"field":"projectComposition.leadResearchOrganisation.name.exact","display":"lead orgs"},
-                {'field':'projectComposition.collaborator.name.exact','display':'collaborators'},
-                {'field':'projectComposition.organisation.name.exact','display':'organisations'},
-                {"field":"projectComposition.projectPerson.name.exact","display":"project people"},
-                {"field":"projectComposition.project.status.exact","display":"project status"},
-                {"field":"projectComposition.project.output.researchMaterialOutput.impact.exact","display":"project research impact"},
-                {"field":"projectComposition.project.output.productOutput.impact.exact","display":"project product impact"},
-                {"field":"projectComposition.project.title.exact","display":"project title"},
-                {"field":"projectComposition.project.grantReference.exact","display":"grantref"},
-                {"field":"projectComposition.project.grantCategory.exact","display":"grant category"},
-            ],
-            "suggestions_size": 100,
-            "paging":{
+            "target": 'http://test.cottagelabs.com:9200/gtr/project/_search',
+            "pushstate": false,
+            "defaultquery": {
+                "query": {
+                    "bool": {
+                        "must":[]
+                    }
+                },
                 "from":0,
-                "size":100
+                "size":100,
+                "fields":[
+                    "projectComposition.leadResearchOrganisation.name.exact",
+                    'projectComposition.collaborator.name.exact',
+                    'projectComposition.organisation.name.exact',
+                    "projectComposition.projectPerson.name.exact",
+                    "projectComposition.project.status.exact",
+                    "projectComposition.project.output.researchMaterialOutput.impact.exact",
+                    "projectComposition.project.output.productOutput.impact.exact",
+                    "projectComposition.project.title.exact",
+                    "projectComposition.project.grantReference.exact",
+                    "projectComposition.project.grantCategory.exact",
+                    'projectComposition.project.publication.title.exact',
+                    'date'
+                ],
+                "facets":{
+                    "leads": {"term":{"field":"projectComposition.leadResearchOrganisation.name.exact","suggest": true}},
+                    "collaborators": {"term":{'field':'projectComposition.collaborator.name.exact', "node": true, "suggest": true}},
+                    "orgs": {"term":{'field':'projectComposition.organisation.name.exact',"node": true, "suggest": true}},
+                    "people": {"term":{"field":"projectComposition.projectPerson.name.exact","node": true, "suggest": true}},
+                    "status": {"term":{"field":"projectComposition.project.status.exact","suggest": true}},
+                    "research impact": {"term":{"field":"projectComposition.project.output.researchMaterialOutput.impact.exact","node":true, "suggest": true}},
+                    "product impact": {"term":{"field":"projectComposition.project.output.productOutput.impact.exact","node":true, "suggest": true}},
+                    "title": {"term":{"field":"projectComposition.project.title.exact","suggest": true}},
+                    "ref": {"term":{"field":"projectComposition.project.grantReference.exact","suggest": true}},
+                    "category": {"term":{"field":"projectComposition.project.grantCategory.exact","suggest": true}},
+                    "publication": {"term":{'field':'projectComposition.project.publication.title.exact', "suggest": false, "node": true}},
+                    "range": {"date_histogram": {"interval": "month", "field": "date"}}
+                }
             },
-            "showlabels": false,
-            "slide_on": "",//"projectComposition.project.fund.start",
-            "displaytype": "force",
-            "nodesize": 1000,
-            "nodetypes": [
-                {'field':'projectComposition.collaborator.name.exact','display':'collaborators'},
-                {'field':'projectComposition.organisation.name.exact','display':'organisations'},
-                {'field':'projectComposition.project.publication.title.exact','display':'publications'},
-                {"field":"projectComposition.projectPerson.name.exact","display":"people"},
-                {"field":"projectComposition.project.output.researchMaterialOutput.impact.exact","display":"project research impact"},
-                {"field":"projectComposition.project.output.productOutput.impact.exact","display":"project product impact"}
-            ]
+            "nodesize": 100
         });
     });
     </script>

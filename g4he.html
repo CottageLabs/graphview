@@ -497,6 +497,8 @@
                 "text": searchval
             });
             $('.query_string').select2("data",selectdata);
+            // check the collaborators box
+            $('[data-field="projectComposition.collaborator.name.exact"]').attr('checked','checked');
             // trigger a search
             $('.query_string').trigger('change');
             // show some instructions

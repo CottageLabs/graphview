@@ -30,14 +30,16 @@
     <script type="text/javascript" src="vendor/d3/d3.min.js"></script>
 
     <!-- get graphview and launch -->
-    <script type="text/javascript" src="jquery.graphview2.js"></script>
+    <script type="text/javascript" src="jquery.graphview.js"></script>
     <!--<link rel="stylesheet" href="graphview.css"> there isnt any graphview css yet -->
     <script type="text/javascript">
     jQuery(document).ready(function($) {
         $('#graph').css({"height":$(window).height() - 5});
         $('#graph').graphview({
-            "target": 'http://test.cottagelabs.com:9200/gtr/project/_search',
+            //"target": 'http://192.168.1.12:9200/occ/record/_search',
+            "target": 'http://localhost:9200/artemisv2/record/_search',
             "pushstate": false,
+            "titlefield": "name.exact",
             "defaultquery": {
                 "query": {
                     "bool": {
@@ -47,35 +49,24 @@
                 "from":0,
                 "size":100,
                 "fields":[
-                    "projectComposition.leadResearchOrganisation.name.exact",
-                    'projectComposition.collaborator.name.exact',
-                    'projectComposition.organisation.name.exact',
-                    "projectComposition.projectPerson.name.exact",
-                    "projectComposition.project.status.exact",
-                    "projectComposition.project.output.researchMaterialOutput.impact.exact",
-                    "projectComposition.project.output.productOutput.impact.exact",
-                    "projectComposition.project.title.exact",
-                    "projectComposition.project.grantReference.exact",
-                    "projectComposition.project.grantCategory.exact",
-                    'projectComposition.project.publication.title.exact',
-                    'date'
+                    /*"journal.name.exact",
+                    "author.name.exact",
+                    "citation.identifier.id.exact"*/
+                    "name.exact",
+                    "assembled_by.exact",
+                    "location.exact"
                 ],
                 "facets":{
-                    "leads": {"term":{"field":"projectComposition.leadResearchOrganisation.name.exact","suggest": true}},
-                    "collaborators": {"term":{'field':'projectComposition.collaborator.name.exact', "node": true, "suggest": true}},
-                    "orgs": {"term":{'field':'projectComposition.organisation.name.exact',"node": true, "suggest": true}},
-                    "people": {"term":{"field":"projectComposition.projectPerson.name.exact","node": true, "suggest": true}},
-                    "status": {"term":{"field":"projectComposition.project.status.exact","suggest": true}},
-                    "research impact": {"term":{"field":"projectComposition.project.output.researchMaterialOutput.impact.exact","node":true, "suggest": true}},
-                    "product impact": {"term":{"field":"projectComposition.project.output.productOutput.impact.exact","node":true, "suggest": true}},
-                    "title": {"term":{"field":"projectComposition.project.title.exact","suggest": true}},
-                    "ref": {"term":{"field":"projectComposition.project.grantReference.exact","suggest": true}},
-                    "category": {"term":{"field":"projectComposition.project.grantCategory.exact","suggest": true}},
-                    "publication": {"term":{'field':'projectComposition.project.publication.title.exact', "suggest": false, "node": true}},
-                    "range": {"date_histogram": {"interval": "month", "field": "date"}}
+                    /*"journals": {"term":{"field":"journal.name.exact","suggest":true, "node": true}},
+                    "authors": {"term":{"field":"author.name.exact","suggest": true, "node": true}},
+                    "citations": {"term":{"field":"citation.identifier.id.exact","suggest":true, "node":true}}*/
+                    "assembler": {"term":{"field":"assembled_by.exact","suggest":true, "node": true}},
+                    "locations": {"term":{"field":"location.exact","suggest": true, "node": true}},
+                    "types": {"term":{"field":"type.exact","suggest": true, "node": true}}
                 }
             },
-            "nodesize": 100
+            "nodesize": 100,
+            "focusdepth": 2
         });
     });
     </script>

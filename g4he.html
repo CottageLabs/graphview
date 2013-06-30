@@ -187,10 +187,10 @@
     #graphview_instructions {
         z-index: 1000000;
         position:absolute;
-        top:20%;
+        top:15%;
         left:30%;
         width:500px;
-        height:300px;
+        height:400px;
     }
     
     .select2-results .select2-highlighted {
@@ -503,8 +503,17 @@
             if ( !$('#graphview_instructions').length ) {
                 var instructions = '<div id="graphview_instructions" class="alert alert-block">';
                 instructions += '<button type="button" class="close" data-dismiss="alert">&times;</button>';
-                instructions += '<p>HI</p>';
-                instructions += '<p>rhfowif wiehfw oefhowi fowiehf woi hfweoih fwoiefh owieh foiweh fowieh owieh oi foiwef oiw foiw  efowi eoweh fowiehf owieh foihweo fwioehf owi</p>';
+
+                instructions += '<p>Explore research projects - those are the blue bubbles. Mouseover bubbles to see their names and highlight their links.</p>';
+                instructions += '<p>Use the search bar at the top to find particular projects - and use the dropdown to the left of it to choose what sorts of suggestions you want - e.g. collaborators, people.</p>';
+                instructions += '<p>Default view is the first 100 projects, use the "from" and "to" values under the search bar to view different batches - changing the "from" value auto-adjust the "to" value, and changing the "to" value can be used to increase the number on display.</p>';
+                instructions += '<p>Select what other objects you want to visualise using the checkboxes - and note size options become available for those too.</p>';
+                instructions += '<p>Mouseover and click-and-hold to quickly drag any bubble into the search bar to add it to the query.</p>';
+                instructions += '<p>Click-and-hold the white background to navigate around the visualisation. Mouse-scroll / double-click to zoom in / out.</p>'
+                instructions += '<p>NOTE: although you can increase the number of bubbles visible on the screen, doing so will slow down the visualisation; More than a couple of thousand on a laptop may get unresponsive.</p>';
+                instructions += '<p>This is still a work in progress - it provides a visual representation to allow a high-level overview and exploration of your research collaborations, but of course does not provide much in the way of detail. Have fun exploring, and please check back in future for further functionality such as detailed reports.</p>';
+                instructions += '<p>(If it all stops working, just refresh the page :) Enjoy!</p>';
+
                 instructions += '</div>';
                 $('#graph').append(instructions);
             }

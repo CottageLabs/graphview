@@ -460,7 +460,7 @@
                 data ? $('#whoareyou').graphview.options.response = data : false;
                 var org = $('#whoareyou').val();
 
-                var logo = org.toLowerCase().replace(/\s/g,'_').replace('university_','').replace('_university','').replace('_of','').replace('of_','').replace('_the','').replace('_the','').replace('_and','').replace('and_','').replace('_.','.') + '.png';
+                var logo = org.toLowerCase().replace(/\s/g,'_').replace("'",'').replace('university_','').replace('_university','').replace('_of','').replace('of_','').replace('_the','').replace('_the','').replace('_and','').replace('and_','').replace('_.','.') + '.png';
                 
                 var img = '<img class="img thumbnail" src="g4he/logos/' + logo + '" style="width:487px;margin-left:30px;">';
                 

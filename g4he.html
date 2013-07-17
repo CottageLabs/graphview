@@ -283,9 +283,9 @@
     jQuery(document).ready(function($) {
         $('#graph').css({"height":$(window).height() - 5});
         $('#graph').graphview({
-            "target": 'http://test.cottagelabs.com:9200/gtr/project/_search',
+            "target": 'http://test.cottagelabs.com:9200/g4he2/record/_search',
             "pushstate": false,
-            "titlefield": "projectComposition.project.title.exact",
+            "titlefield": "project.title.exact",
             "defaultquery": {
                 "query": {
                     "bool": {
@@ -295,32 +295,32 @@
                 "from":0,
                 "size":100,
                 "fields":[
-                    "projectComposition.leadResearchOrganisation.name.exact",
-                    'projectComposition.collaborator.name.exact',
-                    'projectComposition.organisation.name.exact',
-                    "projectComposition.projectPerson.name.exact",
-                    "projectComposition.project.status.exact",
-                    "projectComposition.project.output.researchMaterialOutput.impact.exact",
-                    "projectComposition.project.output.productOutput.impact.exact",
-                    "projectComposition.project.title.exact",
-                    "projectComposition.project.grantReference.exact",
-                    "projectComposition.project.grantCategory.exact",
-                    'projectComposition.project.publication.title.exact',
-                    'date'
+                    "leadRo.name.exact",
+                    "collaboratorOrganisation.organisation.name.exact",
+                    "primaryFunder.name.exact",
+                    "projectPartner.name.exact",
+                    "collaboratorPerson.person.surname.exact",
+                    "project.status.exact",
+                    "project.output.researchMaterialOutput.impact.exact",
+                    "project.output.productOutput.impact.exact",
+                    "project.title.exact",
+                    "project.grantReference.exact",
+                    "project.grantCategory.exact",
+                    'project.publication.title.exact'
                 ],
                 "facets":{
-                    "leads": {"term":{"field":"projectComposition.leadResearchOrganisation.name.exact","suggest": true}},
-                    "collaborators": {"term":{'field':'projectComposition.collaborator.name.exact', "node": true, "suggest": true}},
-                    "organisations": {"term":{'field':'projectComposition.organisation.name.exact',"node": true, "suggest": true}},
-                    "project people": {"term":{"field":"projectComposition.projectPerson.name.exact","node": true, "suggest": true}},
-                    "status": {"term":{"field":"projectComposition.project.status.exact","suggest": true}},
-                    "research impact": {"term":{"field":"projectComposition.project.output.researchMaterialOutput.impact.exact","node":true, "suggest": true}},
-                    "product impact": {"term":{"field":"projectComposition.project.output.productOutput.impact.exact","node":true, "suggest": true}},
-                    "project title": {"term":{"field":"projectComposition.project.title.exact","suggest": true}},
-                    "grant reference": {"term":{"field":"projectComposition.project.grantReference.exact","suggest": true}},
-                    "grant category": {"term":{"field":"projectComposition.project.grantCategory.exact","suggest": true}},
-                    "publications": {"term":{'field':'projectComposition.project.publication.title.exact', "suggest": false, "node": true}},
-                    "range": {"date_histogram": {"interval": "month", "field": "date"}}
+                    "lead organisations": {"term":{"field":"leadRo.name.exact","suggest": true}},
+                    "collaborators": {"term":{'field':'collaboratorOrganisation.organisation.name.exact', "node": true, "suggest": true}},
+                    "funders": {"term":{'field':'primaryFunder.name.exact', "node": true, "suggest": true}},
+                    "project partners": {"term":{"field":"projectPartner.name.exact","node": true, "suggest": true}},
+                    "people": {"term":{"field":"collaboratorPerson.person.surname.exact","node": true, "suggest": true}},
+                    "status": {"term":{"field":"project.status.exact","suggest": true}},
+                    "research impact": {"term":{"field":"project.output.researchMaterialOutput.impact.exact","node":true, "suggest": true}},
+                    "product impact": {"term":{"field":"project.output.productOutput.impact.exact","node":true, "suggest": true}},
+                    "project title": {"term":{"field":"project.title.exact","suggest": true}},
+                    "grant reference": {"term":{"field":"project.grantReference.exact","suggest": true}},
+                    "grant category": {"term":{"field":"project.grantCategory.exact","suggest": true}},
+                    "publications": {"term":{'field':'project.publication.title.exact', "suggest": false, "node": true}}
                 }
             },
             "nodesize": 100,
@@ -329,7 +329,7 @@
         
         // launch customised graphview on the G4HE explorer
         $('#explorer').graphview({
-            "target": 'http://test.cottagelabs.com:9200/gtr/project/_search',
+            "target": 'http://test.cottagelabs.com:9200/g4he2/record/_search',
             "defaultquery": {
                 "query": {
                     "bool": {
@@ -337,12 +337,18 @@
                     }
                 },
                 "fields":[
-                    "projectComposition.leadResearchOrganisation.name.exact",
-                    'projectComposition.collaborator.name.exact',
-                    'projectComposition.organisation.name.exact',
-                    "projectComposition.project.title.exact",
-                    "projectComposition.project.grantReference.exact",
-                    "projectComposition.project.grantCategory.exact",
+                    "leadRo.name.exact",
+                    "collaboratorOrganisation.organisation.name.exact",
+                    "primaryFunder.name.exact",
+                    "projectPartner.name.exact",
+                    "collaboratorPerson.person.surname.exact",
+                    "project.status.exact",
+                    "project.output.researchMaterialOutput.impact.exact",
+                    "project.output.productOutput.impact.exact",
+                    "project.title.exact",
+                    "project.grantReference.exact",
+                    "project.grantCategory.exact",
+                    'project.publication.title.exact'
                 ],
                 "facets":{
                 }
@@ -360,14 +366,14 @@
                     placeholder: "Who are you?",
                     minimumInputLength: 3,
                     ajax: { // instead of writing the function to execute the request we use Select2's convenient helper
-                        url: 'http://test.cottagelabs.com:9200/gtr/project/_search',
+                        url: 'http://test.cottagelabs.com:9200/g4he2/record/_search',
                         dataType: 'JSON',
                         data: function (term) {
                             return {
                                 "source": JSON.stringify({
                                     "query": {
                                         "query_string": {
-                                            "default_field": 'projectComposition.organisation.name',
+                                            "default_field": 'collaboratorOrganisation.organisation.name',
                                             "query": "*" + term + "*"
                                         }
                                     },
@@ -375,7 +381,7 @@
                                     "facets": {
                                         "tags":{
                                             "terms": {
-                                                "field": 'projectComposition.organisation.name.exact',
+                                                "field": 'collaboratorOrganisation.organisation.name.exact',
                                                 "order": "count",
                                                 "size": 20
                                             },
@@ -424,22 +430,22 @@
                 var qry = {
                     "query": {
                         "term": {
-                            "projectComposition.organisation.name.exact": $('#whoareyou').val()
+                            "collaboratorOrganisation.organisation.name.exact": $('#whoareyou').val()
                         }
                     },
                     "size": 10000,
-                    "fields": ['projectComposition.project.fund.valuePounds'],
+                    "fields": ['project.fund.valuePounds'],
                     "facets": {
                         "collaborators":{
                             "terms": {
-                                "field": 'projectComposition.collaborator.name.exact',
+                                "field": 'collaboratorOrganisation.organisation.name.exact',
                                 "order": "count",
                                 "size": 100
                             },
                             "facet_filter": {
                                 "query": {
                                     "term": {
-                                        "projectComposition.organisation.name.exact": $('#whoareyou').val()
+                                        "collaboratorOrganisation.organisation.name.exact": $('#whoareyou').val()
                                     }
                                 }
                             }
@@ -447,7 +453,7 @@
                     }
                 };
                 var ajaxopts = {
-                    url: 'http://test.cottagelabs.com:9200/gtr/project/_search?source=' + JSON.stringify(qry),
+                    url: 'http://test.cottagelabs.com:9200/g4he2/record/_search?source=' + JSON.stringify(qry),
                     contentType: "application/json; charset=utf-8",
                     type: 'GET',
                     dataType: 'JSONP',
@@ -466,7 +472,7 @@
                 
                 var total = 0;
                 for ( var i=0; i < data.hits.hits.length; i++ ) {
-                    total += data.hits.hits[i].fields['projectComposition.project.fund.valuePounds'];
+                    total += data.hits.hits[i].fields['project.fund.valuePounds'];
                 }
                 
                 var info = '<p class="lead">We know of ' + data.facets.collaborators.total + ' collaborators</p>';
@@ -493,12 +499,12 @@
             // add the selected org from previous screen
             var searchval = $(this).attr('data-visthis');
             selectdata.push({
-                "id": "projectComposition.organisation.name.exact__________" + searchval, 
+                "id": "collaboratorOrganisation.organisation.name.exact__________" + searchval, 
                 "text": searchval
             });
             $('.query_string').select2("data",selectdata);
             // check the collaborators box
-            $('[data-field="projectComposition.collaborator.name.exact"]').attr('checked','checked');
+            $('[data-field="collaboratorOrganisation.organisation.name.exact"]').attr('checked','checked');
             // trigger a search
             $('.query_string').trigger('change');
             // show some instructions
@@ -719,7 +725,7 @@
         you want to tell us something about our service or to get involved. Check out our 
         <a href="http://g4he.wordpress.com">project blog</a> for more information.</p>
 
-        <p class="lead">There is an open <a href="">google group</a> that you can join for discussion and feedback.<br>
+        <p class="lead">There is an open <a href="https://groups.google.com/forum/#!forum/g4he-discuss">google group</a> that you can join for discussion and feedback.<br>
         Also we have a testing group - if you want to join it
         <a href="mailto:bex@cottagelabs.com">let us know</a>.</p>
         

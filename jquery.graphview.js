@@ -121,6 +121,8 @@ if (!Array.prototype.indexOf) {
             "default_operator": "AND", // ES default operator param
             "query_string_fuzzify": "*", // this and default_operator are used by default query function
 
+            "fill": "a function that provides colors to be used on the bubbles. default defined below",
+
             "showresults": "a function that displays the query results - takes data obj as param (default defined below)",
             "response": "the default showresults writes the query results object into this key, for further access",
             "nodes": "for building a force graph, the node data is required. the default showresults calculates and stores here",
@@ -160,7 +162,7 @@ if (!Array.prototype.indexOf) {
         // ===============================================
         // ===============================================
 
-        var fill = d3.scale.category10();
+        defaults.fill = d3.scale.category10();
 
         var label = function(d) {
             // calculate a label
@@ -284,7 +286,7 @@ if (!Array.prototype.indexOf) {
                 .attr("cx", function(d) { return d.x; })
                 .attr("cy", function(d) { return d.y; })
                 .attr("r", function(d) { return cr(d.value); })
-                .style("fill", function(d) { return fill(d.group); })
+                .style("fill", function(d) { return options.fill(d.group); })
                 .call(force.drag)
                 .on("mouseover", highlight(.1))
                 .on("mouseout", highlight(1))
@@ -629,7 +631,7 @@ if (!Array.prototype.indexOf) {
                 $('.select2-search-choice', obj).each(function(i) {
                     var kv = selectdata[i]['id'].split('__________');
                     if ( kv.length > 1 ) {
-                        $(this).css({"color":fill(kv[0])});
+                        $(this).css({"color":options.fill(kv[0])});
                     }
                     var nonumber = $(this).children('div').text().replace(/ \([0-9]*\)/,'');
                     $(this).children('div').text(nonumber);
@@ -758,11 +760,11 @@ if (!Array.prototype.indexOf) {
             
             ui += '<div class="graphview_searcharea" style="-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;position:absolute;top:5px;left:5px;z-index:1000;">';
             ui += '<select class="graphview_suggest" style="display:inline;width:180px;height:29px;margin-right:-2px;background:#eee;border-radius:5px 0px 0px 5px;">';
-            ui += '<option style="color:' + fill("records") + ';" data-value="records">search everything</option>';
+            ui += '<option style="color:' + options.fill("records") + ';" data-value="records">search everything</option>';
             for ( var key in options.defaultquery.facets ) {
                 var obj = options.defaultquery.facets[key];
                 if ( key != "range" && obj.term.suggest ) { // TODO: change this in case it is not a term facet?
-                    ui += '<option data-value="' + obj.term.field + '" style="color:' + fill(obj.term.field) + ';">suggest ' + key + '</option>';
+                    ui += '<option data-value="' + obj.term.field + '" style="color:' + options.fill(obj.term.field) + ';">suggest ' + key + '</option>';
                     ui += ', ';
                 }
             }
@@ -786,7 +788,7 @@ if (!Array.prototype.indexOf) {
             for ( var key in options.defaultquery.facets ) {
                 if ( key != "range" && options.defaultquery.facets[key].term.node ) { // TODO: change this in case the facet is not a term type?
                     var node = options.defaultquery.facets[key].term;
-                    ui += '<div style="margin-right:2px;color:' + fill(node.field) + ';"><input type="checkbox" class="graphview_nodetype" data-field="' + node.field + '" /> ' + key + '</div>';
+                    ui += '<div style="margin-right:2px;color:' + options.fill(node.field) + ';"><input type="checkbox" class="graphview_nodetype" data-field="' + node.field + '" /> ' + key + '</div>';
                 }
             };
             ui += '</div>'; // closes nodesarea
